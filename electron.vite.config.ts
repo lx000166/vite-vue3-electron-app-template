@@ -1,6 +1,7 @@
 import { resolve } from 'path'
 import { defineConfig } from 'electron-vite'
 import vue from '@vitejs/plugin-vue'
+import VueRouter from 'vue-router/vite'
 import UnoCSS from 'unocss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
@@ -15,11 +16,20 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src')
       }
     },
+    css: {
+      preprocessorOptions: {
+        scss: {}
+      }
+    },
     plugins: [
       vue(),
+      VueRouter({
+        routesFolder: 'src/renderer/src/pages',
+        dts: 'src/renderer/src/types/typed-router.d.ts'
+      }),
       UnoCSS(),
       AutoImport({
-        dts: 'src/auto-imports.d.ts',
+        dts: 'src/types/auto-imports.d.ts',
         dirs: ['src/stores', 'src/composables'],
         imports: [
           'vue',
@@ -33,7 +43,7 @@ export default defineConfig({
         resolvers: [NaiveUiResolver()]
       }),
       Components({
-        dts: 'src/components.d.ts',
+        dts: 'src/types/components.d.ts',
         dirs: ['src/components'],
         resolvers: [NaiveUiResolver()]
       })

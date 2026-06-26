@@ -6,7 +6,14 @@ import vueParser from 'vue-eslint-parser'
 
 export default defineConfig(
   {
-    ignores: ['**/node_modules', '**/dist', '**/out', '**/auto-imports.d.ts', '**/components.d.ts']
+    ignores: [
+      '**/node_modules',
+      '**/dist',
+      '**/out',
+      '**/auto-imports.d.ts',
+      '**/components.d.ts',
+      '**/typed-router.d.ts'
+    ]
   },
   tseslint.configs.recommended,
   eslintPluginVue.configs['flat/recommended'],

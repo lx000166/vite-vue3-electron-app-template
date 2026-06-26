@@ -4,3 +4,6 @@ out
 .DS_Store
 .eslintcache
 *.log*
+src/renderer/src/types/auto-imports.d.ts
+src/renderer/src/types/components.d.ts
+src/renderer/src/types/typed-router.d.ts

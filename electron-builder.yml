@@ -9,15 +9,44 @@ files:
   - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  # 排除项目文档和 AI 辅助文件
+  - '!AGENTS.md'
+  - '!CLAUDE.md'
+  - '!.agents'
+  # 方案三：排除 node_modules 中的多余文件
+  - '!node_modules/**/CHANGELOG.md'
+  - '!node_modules/**/LICENSE'
+  - '!node_modules/**/*.md'
+  - '!node_modules/**/docs'
+  - '!node_modules/**/example'
+  - '!node_modules/**/examples'
+  - '!node_modules/**/test'
+  - '!node_modules/**/tests'
+  - '!node_modules/**/__tests__'
+  - '!node_modules/**/*.map'
+  - '!node_modules/**/*.ts'
+  - '!node_modules/**/tsconfig*.json'
 asarUnpack:
   - resources/**
+# 方案二：仅保留中英文语言包（减少 ~47 MB）
+electronLanguages:
+  - zh-CN
+  - en-US
 win:
   executableName: vite-vue3-tres-app
+  # 绿色免安装 zip 包
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: zip
+      arch: [x64]
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
+  # 方案五：启用 7z 最高压缩
+  differentialPackage: false
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
@@ -38,8 +67,5 @@ linux:
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
-publish:
-  provider: generic
-  url: https://example.com/auto-updates
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

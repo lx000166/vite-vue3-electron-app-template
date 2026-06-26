@@ -1,103 +1,84 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import windowStateKeeper from 'electron-window-state'
 import icon from '../../resources/icon.png?asset'
 
-/**
- * 生成圆角窗口区域，供 Windows / Linux 的 setShape 使用。
- * 通过顶部和底部逐行收窄宽度，拼出近似真实圆角窗口。
- * 内部使用 0.1 像素精度采样，让圆角边缘更细腻。
- * @param 窗口宽度 当前窗口宽度
- * @param 窗口高度 当前窗口高度
- * @param 圆角半径 圆角半径
- */
-function 生成圆角窗口区域(
-  窗口宽度: number,
-  窗口高度: number,
-  圆角半径: number
-): Electron.Rectangle[] {
-  // 区域集合(rectangles)用于描述窗口真实可见和可点击区域。
-  const 区域集合: Electron.Rectangle[] = []
-  const 有效半径 = Math.max(0, Math.min(圆角半径, Math.floor(Math.min(窗口宽度, 窗口高度) / 2)))
-  const 采样精度 = 0.1
-
-  const 计算左侧缩进 = (垂直位置: number): number => {
-    if (垂直位置 < 有效半径) {
-      const 顶部偏移 = Math.max(0, 有效半径 - 垂直位置 - 1)
-      return Math.ceil(有效半径 - Math.sqrt(有效半径 * 有效半径 - 顶部偏移 * 顶部偏移))
+// ── 单实例锁 ────────────────────────────────────
+// 防止用户多次启动应用，第二次启动时激活已有窗口
+const gotTheLock = app.requestSingleInstanceLock()
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', () => {
+    const mainWindow = BrowserWindow.getAllWindows()[0]
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
     }
-
-    if (垂直位置 >= 窗口高度 - 有效半径) {
-      const 底部偏移 = Math.max(0, 垂直位置 - (窗口高度 - 有效半径))
-      return Math.ceil(有效半径 - Math.sqrt(有效半径 * 有效半径 - 底部偏移 * 底部偏移))
-    }
-
-    return 0
-  }
-
-  for (let 当前行 = 0; 当前行 < 窗口高度; 当前行 += 1) {
-    let 左侧缩进 = 0
-
-    // 每一行内部再按 0.1 精度采样，取该行所需的最大缩进，避免边缘过于生硬。
-    for (let 采样偏移 = 0; 采样偏移 < 1; 采样偏移 += 采样精度) {
-      左侧缩进 = Math.max(左侧缩进, 计算左侧缩进(当前行 + 采样偏移))
-    }
-
-    const 当前宽度 = Math.max(1, 窗口宽度 - 左侧缩进 * 2)
-
-    区域集合.push({
-      x: 左侧缩进,
-      y: 当前行,
-      width: 当前宽度,
-      height: 1
-    })
-  }
-
-  return 区域集合
+  })
 }
 
 function createWindow(): void {
-  // 主窗口尺寸(windowSize)用于统一维护透明无边框窗口大小。
-  const 主窗口尺寸 = {
-    width: 900,
-    height: 670
-  }
-  // 圆角半径(cornerRadius)用于控制异形窗口圆角大小。
-  const 圆角半径 = 8
+  // ── 窗口状态持久化（记忆上次位置和尺寸）──────
+  const windowState = windowStateKeeper({
+    defaultWidth: 900,
+    defaultHeight: 670
+  })
 
-  // Create the browser window.
+  // ── 创建浏览器窗口 ──────────────────────────────
   const mainWindow = new BrowserWindow({
-    width: 主窗口尺寸.width,
-    height: 主窗口尺寸.height,
+    // [尺寸/位置] 从上次保存的状态恢复，首次使用默认值
+    x: windowState.x,
+    y: windowState.y,
+    width: windowState.width,
+    height: windowState.height,
+
+    // [显示控制] 设为 false，等 ready-to-show 事件触发后再显示，
+    // 避免用户看到白屏闪烁
     show: false,
+
+    // [窗口边框] 设为 false 移除系统标题栏和边框，
+    // 实现无边框窗口，可配合前端自定义标题栏
     frame: false,
-    transparent: true,
-    hasShadow: false,
-    backgroundColor: '#00000000',
+
+    // [菜单栏] 自动隐藏菜单栏（Windows/Linux），
+    // 按下 Alt 键可临时显示
     autoHideMenuBar: true,
+
+    // [平台配置] Linux 下设置应用图标（macOS/Win 由打包器处理）
     ...(process.platform === 'linux' ? { icon } : {}),
+
+    // [安全与预加载]
     webPreferences: {
+      // 预加载脚本路径：用于在渲染进程和主进程之间安全地暴露 API
       preload: join(__dirname, '../preload/index.js'),
+      // 关闭沙箱：@electron-toolkit/utils 部分功能需要 Node.js 环境，
+      // 生产环境如需启用，需通过 contextBridge 暴露受限 API
       sandbox: false
     }
   })
 
-  mainWindow.on('ready-to-show', () => {
-    // 异形圆角(shape)在非 macOS 平台上通过 setShape 生成真实圆角窗口。
-    if (process.platform !== 'darwin') {
-      mainWindow.setShape(生成圆角窗口区域(主窗口尺寸.width, 主窗口尺寸.height, 圆角半径))
-    }
+  // ── 注册窗口状态变化监听 ────────────────────
+  // 窗口移动/缩放时自动保存位置和尺寸到本地文件
+  windowState.manage(mainWindow)
 
+  // ── 窗口就绪后显示 ──────────────────────────
+  mainWindow.on('ready-to-show', () => {
     mainWindow.show()
   })
 
+  // ── 外部链接处理 ──────────────────────────────
+  // 拦截 window.open 调用，改为在系统默认浏览器中打开，
+  // 防止渲染进程导航到外部 URL
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
   })
 
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
+  // ── 加载页面 ──────────────────────────────────
+  // 开发模式：加载 Vite 开发服务器 URL（支持 HMR 热更新）
+  // 生产模式：加载构建后的本地 HTML 文件
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
@@ -105,40 +86,36 @@ function createWindow(): void {
   }
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+// ── 应用生命周期 ──────────────────────────────────
+// Electron 初始化完成后创建窗口。
+// 只有在这个事件之后才能使用 BrowserWindow 等 API。
 app.whenReady().then(() => {
-  // Set app user model id for windows
+  // 设置 Windows 任务栏上的应用 User Model ID，
+  // 用于将应用窗口分组显示
   electronApp.setAppUserModelId('com.electron')
 
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
+  // 开发环境下 F12 打开/关闭 DevTools，
+  // 生产环境中忽略 Ctrl+R 刷新快捷键
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
+  // IPC 通信示例：渲染进程发送 'ping'，主进程打印 'pong'
   ipcMain.on('ping', () => console.log('pong'))
 
   createWindow()
 
+  // macOS 特有行为：点击 Dock 图标且没有窗口时重新创建窗口
   app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 })
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
+// ── 退出处理 ─────────────────────────────────────
+// 所有窗口关闭时退出应用（macOS 除外，macOS 应用通常
+// 保持活跃直到用户按 Cmd+Q 显式退出）
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
 })
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
