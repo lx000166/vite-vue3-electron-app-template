@@ -1,74 +1,12 @@
-/* @import './base.css'; */
 @import './init.css';
-
-@font-face {
-  font-family: 'MF MiMeng';
-  src: url('./fonts/MFMiMeng_Noncommercial-Regular.otf') format('opentype');
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Fira Code';
-  src: url('./fonts/ttf/FiraCode-Light.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 300;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Fira Code';
-  src: url('./fonts/ttf/FiraCode-Regular.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Fira Code';
-  src: url('./fonts/ttf/FiraCode-Retina.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 450;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Fira Code';
-  src: url('./fonts/ttf/FiraCode-Medium.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Fira Code';
-  src: url('./fonts/ttf/FiraCode-SemiBold.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Fira Code';
-  src: url('./fonts/ttf/FiraCode-Bold.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-}
+@import './fonts.css';
 
 body {
   height: 100vh;
   width: 100vw;
-  /* display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden; */
-  /* background: transparent; */
   background-color: #d0d4da;
   font-family: 'MF MiMeng', 'Fira Code', 'Microsoft YaHei', 'PingFang SC', sans-serif;
   user-select: none;
-  -webkit-app-region: drag;
 }
 
 #app {
@@ -78,4 +16,12 @@ body {
 
 .font-en {
   font-family: 'Fira Code', monospace;
+}
+
+/* Electron 无框窗口拖拽区域 */
+.drag {
+  -webkit-app-region: drag;
+}
+.no-drag {
+  -webkit-app-region: no-drag;
 }

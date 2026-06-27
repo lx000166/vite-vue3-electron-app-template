@@ -6,6 +6,7 @@ import {
   presetUno,
   transformerDirectives
 } from 'unocss'
+import iconParkIcons from '@iconify-json/icon-park-outline/icons.json'
 
 export default defineConfig({
   shortcuts: {
@@ -20,5 +21,7 @@ export default defineConfig({
     }
   },
   presets: [presetUno(), presetAttributify(), presetTypography(), presetIcons()],
-  transformers: [transformerDirectives()]
+  transformers: [transformerDirectives()],
+  // IconPark 全量 safelist — 动态菜单图标不丢失，零维护
+  safelist: Object.keys(iconParkIcons.icons).map((k) => `i-icon-park-outline-${k}`)
 })
