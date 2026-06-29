@@ -6,6 +6,10 @@
   - 鉴权：需要登录
 -->
 <script setup lang="ts">
+import { useAuthStore } from '@renderer/stores/auth'
+
+const router = useRouter()
+const authStore = useAuthStore()
 definePage({
   meta: {
     layout: 'sidebar',
@@ -16,6 +20,12 @@ definePage({
     menuIcon: 'home'
   }
 })
+
+/** 退出登录：清除 token 并跳转登录页 */
+function doLogout(): void {
+  authStore.logout()
+  router.replace('/login')
+}
 </script>
 
 <template>
@@ -35,6 +45,7 @@ definePage({
         </div>
       </div>
       <p class="text-gray-400 text-sm">CSS 3D Transform 四棱柱旋转</p>
+      <n-button class="mt-4" @click="doLogout">退出登录</n-button>
     </div>
   </MainContainer>
 </template>
