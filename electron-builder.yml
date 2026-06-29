@@ -1,30 +1,16 @@
-appId: com.electron.app
+appId: com.lx000.vite-vue3-tres-app
 productName: vite-vue3-tres-app
 directories:
   buildResources: build
 files:
-  - '!**/.vscode/*'
-  - '!src/*'
-  - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
-  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
-  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
-  # 排除项目文档和 AI 辅助文件
-  - '!AGENTS.md'
-  - '!.agents'
-  # 方案三：排除 node_modules 中的多余文件
-  - '!node_modules/**/CHANGELOG.md'
-  - '!node_modules/**/LICENSE'
-  - '!node_modules/**/*.md'
-  - '!node_modules/**/docs'
-  - '!node_modules/**/example'
-  - '!node_modules/**/examples'
-  - '!node_modules/**/test'
-  - '!node_modules/**/tests'
-  - '!node_modules/**/__tests__'
-  - '!node_modules/**/*.map'
-  - '!node_modules/**/*.ts'
-  - '!node_modules/**/tsconfig*.json'
+  # 白名单：仅打包构建产物和资源文件
+  # electron-builder 自动包含 package.json 和 dependencies 生产依赖
+  - 'out/**'
+  - 'resources/**'
+  # 精简 node_modules（排除开发文档、测试、源码等）
+  - '!node_modules/**/{CHANGELOG.md,LICENSE,*.md}'
+  - '!node_modules/**/{docs,example,examples,test,tests,__tests__}'
+  - '!node_modules/**/{*.map,*.ts,tsconfig*.json}'
 asarUnpack:
   - resources/**
 # 方案二：仅保留中英文语言包（减少 ~47 MB）
@@ -44,13 +30,11 @@ nsis:
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
-  # 方案五：启用 7z 最高压缩
+  # 启用 7z 最高压缩
   differentialPackage: false
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
-    - NSCameraUsageDescription: Application requests access to the device's camera.
-    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
