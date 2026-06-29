@@ -12,6 +12,11 @@ const router = createRouter({
 router.beforeEach((to) => {
   const authStore = useAuthStore()
 
+  // 根路径重定向到首页
+  if (to.path === '/') {
+    return '/home'
+  }
+
   // 已登录用户访问登录页 → 跳转首页
   if (to.path === '/login' && authStore.isLoggedIn) {
     return '/home'
