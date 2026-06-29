@@ -1,34 +1,38 @@
 <!--
   MainContainer — 主内容容器
 
-  自动适配布局：
-  - padding-left  = var(--side-w)  给侧边栏留空间
-  - padding-top   = var(--title-h) 给标题栏留空间
-  - transition 平滑过渡，配合侧边栏折叠动画
+  两层结构：
+  - 外层（根元素）：干净，供 App.vue 的 page-fade Transition 挂载动画 class
+  - 内层（padding-wrapper）：响应侧边栏/标题栏尺寸变化，仅过渡 padding
+    0.44s 与 App.vue 的 menu-slide / title-slide 动画同步
 
-  内层嵌套：外层 padding → 白色圆角卡片 → 内 padding（slot 插槽）
+  内部嵌套：padding-wrapper → 留白 → 白色圆角卡片 → slot 插槽
 -->
 <template>
-  <!-- 外层：响应侧边栏/标题栏尺寸，平滑过渡 -->
-  <div
-    class="w-full h-full box-border"
-    style="
-      padding-left: var(--side-w);
-      padding-top: var(--title-h);
-      transition: padding 0.44s ease-in-out;
-    "
-  >
-    <!-- 中层：留白 -->
-    <div class="p-16px w-full h-full box-border">
-      <!-- 内层：白色圆角卡片 -->
-      <div
-        class="rounded-8px bg-white/30 shadow-[0_2px_12px_rgba(0,0,0,0.08)] w-full h-full box-border"
-      >
-        <!-- 内容区：插槽 -->
-        <div class="p-16px w-full h-full box-border">
-          <slot />
+  <!-- 外层：零样式负担，Transition class 可以干净挂载 -->
+  <div class="w-full h-full">
+    <!-- 内层：ping 过渡（隔离，不干扰动画） -->
+    <div class="padding-wrapper w-full h-full box-border">
+      <div class="p-16px w-full h-full box-border">
+        <!-- 白色圆角卡片 -->
+        <div
+          class="rounded-8px bg-white/30 shadow-[0_2px_12px_rgba(0,0,0,0.08)] w-full h-full box-border"
+        >
+          <div class="p-16px w-full h-full box-border">
+            <slot />
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.padding-wrapper {
+  padding-left: var(--side-w);
+  padding-top: var(--title-h);
+  transition-property: padding;
+  transition-duration: 0.44s;
+  transition-timing-function: ease-in-out;
+}
+</style>

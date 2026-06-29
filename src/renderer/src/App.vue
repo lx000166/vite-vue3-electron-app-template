@@ -34,7 +34,6 @@ const sideW = computed(() => (collapsed.value ? COLLAPSED_WIDTH : EXPANDED_WIDTH
 </script>
 
 <template>
-  <!-- Naive UI 全局配置 -->
   <n-config-provider
     :theme-overrides="themeConfig.themeOverrides"
     :locale="themeConfig.locale"
@@ -44,27 +43,30 @@ const sideW = computed(() => (collapsed.value ? COLLAPSED_WIDTH : EXPANDED_WIDTH
       <n-dialog-provider>
         <n-notification-provider>
           <n-loading-bar-provider>
-            <!-- 主布局容器：CSS 变量传递尺寸给子组件 -->
             <main
               class="relative w-screen h-screen overflow-hidden"
               :style="{ '--side-w': sideW, '--title-h': TITLE_BAR_H + 'px' }"
             >
-              <!-- 页面内容（底层） -->
-              <router-view />
+              <!-- 页面内容：动态过渡动画 -->
+              <router-view v-slot="{ Component, route: r }">
+                <PageFade>
+                  <component :is="Component" :key="r.path" />
+                </PageFade>
+              </router-view>
 
-              <!-- 侧边栏（中层，带滑动动画） -->
-              <Transition name="menu-slide">
+              <!-- 侧边栏：水平滑动过渡 -->
+              <MenuSlide>
                 <SideMenu
                   v-if="layout === 'sidebar'"
                   :collapsed="collapsed"
                   @toggle="toggleCollapse"
                 />
-              </Transition>
+              </MenuSlide>
 
-              <!-- 标题栏（顶层，带滑动动画） -->
-              <Transition name="title-slide">
+              <!-- 标题栏：垂直滑动过渡 -->
+              <TitleSlide>
                 <TitleBar v-if="layout !== 'none'" />
-              </Transition>
+              </TitleSlide>
             </main>
           </n-loading-bar-provider>
         </n-notification-provider>
@@ -72,34 +74,3 @@ const sideW = computed(() => (collapsed.value ? COLLAPSED_WIDTH : EXPANDED_WIDTH
     </n-message-provider>
   </n-config-provider>
 </template>
-
-<style scoped>
-/* ── 侧边栏滑动动画 ─────────────────────────── */
-.menu-slide-enter-active {
-  transition: transform 0.44s ease;
-}
-.menu-slide-enter-from {
-  transform: translateX(calc(var(--side-w) * -1));
-}
-.menu-slide-leave-active {
-  transition: transform 0.44s ease;
-  z-index: 1;
-}
-.menu-slide-leave-to {
-  transform: translateX(calc(var(--side-w) * -1));
-}
-
-/* ── 标题栏滑动动画 ─────────────────────────── */
-.title-slide-enter-active {
-  transition: transform 0.44s ease;
-}
-.title-slide-enter-from {
-  transform: translateY(calc(var(--title-h) * -1));
-}
-.title-slide-leave-active {
-  transition: transform 0.44s ease;
-}
-.title-slide-leave-to {
-  transform: translateY(calc(var(--title-h) * -1));
-}
-</style>

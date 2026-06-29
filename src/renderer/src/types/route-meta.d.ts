@@ -27,6 +27,8 @@ declare module 'vue-router' {
     menuTitle?: string
     /** 菜单图标名（IconPark Outline） */
     menuIcon?: string
+    /** 页面过渡动画名（由 beforeEach 守卫动态写入） */
+    transitionName?: string
   }
 }
 
