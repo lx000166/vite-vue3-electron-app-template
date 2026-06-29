@@ -1,8 +1,8 @@
 /**
- * 路由配置 — Hash 模式 + 文件路由 + 全局鉴权守卫
+ * 路由配置 — Hash 模式 + 文件路由 + 全局守卫
  *
  * - 路由表由 vue-router/vite 插件根据 src/pages/ 自动生成
- * - beforeEach 守卫负责：根路径重定向、登录态校验
+ * - beforeEach 守卫负责：根路径重定向、登录态校验、页面过渡动画名
  * - 鉴权依赖 stores/auth.ts 中的 useAuthStore
  */
 import { createRouter, createWebHashHistory } from 'vue-router'
@@ -15,7 +15,7 @@ const router = createRouter({
   routes
 })
 
-// ── 全局鉴权守卫 ──────────────────────────────
+// ── 全局守卫 ──────────────────────────────────
 router.beforeEach((to) => {
   const authStore = useAuthStore()
 
@@ -34,7 +34,6 @@ router.beforeEach((to) => {
     return '/login'
   }
 
-  // 放行
   return true
 })
 
