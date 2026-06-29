@@ -1,6 +1,8 @@
 <!--
-  [...all] — 404 兜底页
-  匹配所有未定义的路由
+  404 兜底页 /[...all]
+
+  - 匹配所有未定义的路由
+  - 显示"页面不存在"提示 + 返回首页按钮
 -->
 <script setup lang="ts">
 const router = useRouter()

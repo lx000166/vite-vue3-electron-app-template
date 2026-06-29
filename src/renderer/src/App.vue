@@ -1,33 +1,67 @@
-<!-- App.vue -->
+<!--
+  App.vue — 应用根组件
+
+  职责：
+  - 注入 Naive UI 全局配置（主题、语言、消息/对话框/通知/加载栏 Provider）
+  - 管理布局：通过 CSS 变量 --side-w / --title-h 向下传递尺寸
+  - 控制 TitleBar 和 SideMenu 的显隐（基于 route.meta.layout）
+  - 侧边栏折叠状态持久化到 localStorage
+-->
 <script setup lang="ts">
 import { themeConfig } from '@renderer/theme'
 
+// ── 布局常量 ──────────────────────────────────
+/** 侧边栏展开宽度（px） */
 const EXPANDED_WIDTH = 180
+/** 侧边栏折叠宽度（px） */
 const COLLAPSED_WIDTH = 60
+/** 标题栏高度（px） */
 const TITLE_BAR_H = 40
 
+// ── 布局模式 ──────────────────────────────────
 const route = useRoute()
+/** 当前页面布局模式：none | header | sidebar */
 const layout = computed(() => (route.meta.layout as string) ?? 'sidebar')
 
+// ── 侧边栏折叠状态 ────────────────────────────
 const collapsed = ref(localStorage.getItem('sidebar-collapsed') === 'true')
 function toggleCollapse(): void {
   collapsed.value = !collapsed.value
   localStorage.setItem('sidebar-collapsed', String(collapsed.value))
 }
+/** 侧边栏当前宽度（CSS 变量值） */
 const sideW = computed(() => (collapsed.value ? COLLAPSED_WIDTH : EXPANDED_WIDTH) + 'px')
 </script>
 
 <template>
-  <n-config-provider :theme-overrides="themeConfig.themeOverrides" :locale="themeConfig.locale" :date-locale="themeConfig.dateLocale">
+  <!-- Naive UI 全局配置 -->
+  <n-config-provider
+    :theme-overrides="themeConfig.themeOverrides"
+    :locale="themeConfig.locale"
+    :date-locale="themeConfig.dateLocale"
+  >
     <n-message-provider>
       <n-dialog-provider>
         <n-notification-provider>
           <n-loading-bar-provider>
-            <main class="relative w-screen h-screen overflow-hidden" :style="{ '--side-w': sideW, '--title-h': TITLE_BAR_H + 'px' }">
+            <!-- 主布局容器：CSS 变量传递尺寸给子组件 -->
+            <main
+              class="relative w-screen h-screen overflow-hidden"
+              :style="{ '--side-w': sideW, '--title-h': TITLE_BAR_H + 'px' }"
+            >
+              <!-- 页面内容（底层） -->
               <router-view />
+
+              <!-- 侧边栏（中层，带滑动动画） -->
               <Transition name="menu-slide">
-                <SideMenu v-if="layout === 'sidebar'" :collapsed="collapsed" @toggle="toggleCollapse" />
+                <SideMenu
+                  v-if="layout === 'sidebar'"
+                  :collapsed="collapsed"
+                  @toggle="toggleCollapse"
+                />
               </Transition>
+
+              <!-- 标题栏（顶层，带滑动动画） -->
               <Transition name="title-slide">
                 <TitleBar v-if="layout !== 'none'" />
               </Transition>
@@ -40,13 +74,32 @@ const sideW = computed(() => (collapsed.value ? COLLAPSED_WIDTH : EXPANDED_WIDTH
 </template>
 
 <style scoped>
-.menu-slide-enter-active { transition: transform 0.44s ease; }
-.menu-slide-enter-from   { transform: translateX(calc(var(--side-w) * -1)); }
-.menu-slide-leave-active { transition: transform 0.44s ease; z-index: 1; }
-.menu-slide-leave-to     { transform: translateX(calc(var(--side-w) * -1)); }
+/* ── 侧边栏滑动动画 ─────────────────────────── */
+.menu-slide-enter-active {
+  transition: transform 0.44s ease;
+}
+.menu-slide-enter-from {
+  transform: translateX(calc(var(--side-w) * -1));
+}
+.menu-slide-leave-active {
+  transition: transform 0.44s ease;
+  z-index: 1;
+}
+.menu-slide-leave-to {
+  transform: translateX(calc(var(--side-w) * -1));
+}
 
-.title-slide-enter-active { transition: transform 0.44s ease; }
-.title-slide-enter-from   { transform: translateY(calc(var(--title-h) * -1)); }
-.title-slide-leave-active { transition: transform 0.44s ease; }
-.title-slide-leave-to     { transform: translateY(calc(var(--title-h) * -1)); }
+/* ── 标题栏滑动动画 ─────────────────────────── */
+.title-slide-enter-active {
+  transition: transform 0.44s ease;
+}
+.title-slide-enter-from {
+  transform: translateY(calc(var(--title-h) * -1));
+}
+.title-slide-leave-active {
+  transition: transform 0.44s ease;
+}
+.title-slide-leave-to {
+  transform: translateY(calc(var(--title-h) * -1));
+}
 </style>

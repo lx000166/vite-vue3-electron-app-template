@@ -1,4 +1,11 @@
-<!-- /setting -->
+<!--
+  设置页 /setting
+
+  - 预留：系统设置页面（待开发）
+  - 现有功能：退出登录按钮
+  - 布局：sidebar（标题栏 + 侧边栏）
+  - 鉴权：需要登录
+-->
 <script setup lang="ts">
 import { useAuthStore } from '@renderer/stores/auth'
 
@@ -6,9 +13,17 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 definePage({
-  meta: { layout: 'sidebar', requiresAuth: true, addMenu: true, sort: 99, menuTitle: '设置', menuIcon: 'setting' }
+  meta: {
+    layout: 'sidebar',
+    requiresAuth: true,
+    addMenu: true,
+    sort: 99,
+    menuTitle: '设置',
+    menuIcon: 'setting'
+  }
 })
 
+/** 退出登录：清除 token 并跳转登录页 */
 function doLogout(): void {
   authStore.logout()
   router.replace('/login')

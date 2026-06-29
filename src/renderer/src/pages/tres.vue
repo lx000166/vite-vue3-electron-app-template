@@ -1,4 +1,10 @@
-<!-- /tres -->
+<!--
+  3D 视图页 /tres
+
+  - ⚠️ 待开发：预留用于 TresJS（Three.js）3D 园区场景
+  - 布局：header（仅标题栏翻转至 B 面，无侧边栏）
+  - 鉴权：需要登录
+-->
 <script setup lang="ts">
 definePage({
   meta: {
