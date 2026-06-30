@@ -1,18 +1,9 @@
 <!--
-  TitleBar — 自定义标题栏（CSS 3D 翻转双面）
+  TitleBar — 自定义标题栏（上下平移双面）
 
-  功能：
-  - 窗口拖拽手柄（drag 区域）
-  - A 面（默认）：显示返回箭头（disabled）+ 页面标题 + 窗口控制按钮
-  - B 面（header 布局时翻转显示）：显示返回箭头 + 页面标题 + 窗口控制按钮
-  - 翻转触发：route.meta.layout === 'header' → flipped CSS class → rotateX(-90deg)
-
-  CSS 3D 结构：
-  header[perspective]
-  └── .prism[transform-style:preserve-3d]
-      ├── .face-a  rotateX(0deg)   → A 面（正面）
-      └── .face-b  rotateX(90deg)  → B 面（顶部翻转到正面）
-          flipped 时整个 .prism rotateX(-90deg) → A 面翻到顶部、B 面正面
+  - A 面（默认）：按钮区无返回箭头 + 页面标题 + 窗口控制
+  - B 面（header 布局时）：显示返回箭头 + 页面标题 + 窗口控制
+  - 切换：A translateY(0)→(-100%)，B translateY(100%)→(0)
 -->
 <script setup lang="ts">
 import { useAppStore } from '@renderer/stores/app'
@@ -20,10 +11,10 @@ import { useAppStore } from '@renderer/stores/app'
 const router = useRouter()
 const route = useRoute()
 
-/** 是否触发 3D 翻转（header 布局时翻到 B 面） */
+/** header 布局时切换到 B 面 */
 const flipped = computed(() => route.meta.layout === 'header')
 
-/** 页面标题：优先显示菜单名，回退到应用名 */
+/** 页面标题 */
 const pageTitle = computed(() => {
   const store = useAppStore()
   const menu = route.meta.menuTitle
@@ -31,40 +22,23 @@ const pageTitle = computed(() => {
 })
 
 // ── 窗口控制 ──────────────────────────────────
-function minimize(): void {
-  window.electronAPI?.windowMinimize()
-}
-function toggleMaximize(): void {
-  window.electronAPI?.windowToggleMaximize()
-}
-function closeWindow(): void {
-  window.electronAPI?.windowClose()
-}
-function goBack(): void {
-  router.back()
-}
-
-// ── 开发工具 ──────────────────────────────────
-function openDevTools(): void {
-  window.electronAPI?.openDevTools()
-}
-function forceReload(): void {
-  window.electronAPI?.forceReload()
-}
+function minimize(): void { window.electronAPI?.windowMinimize() }
+function toggleMaximize(): void { window.electronAPI?.windowToggleMaximize() }
+function closeWindow(): void { window.electronAPI?.windowClose() }
+function goBack(): void { router.back() }
+function openDevTools(): void { window.electronAPI?.openDevTools() }
+function forceReload(): void { window.electronAPI?.forceReload() }
 </script>
 
 <template>
   <header
     class="drag absolute top-0 left-0 right-0 z-20 overflow-hidden backdrop-blur-4px"
-    :style="{ height: 'var(--title-h)', perspective: '1800px' }"
+    :style="{ height: 'var(--title-h)' }"
   >
     <div class="prism" :class="{ flipped }">
-      <!-- ═══ A 面（默认正面） ═══ -->
+      <!-- ═══ A 面 ═══ -->
       <div class="face face-a">
-        <!-- 背景层 -->
-        <div class="absolute inset-0 z-1" />
         <div class="absolute inset-0 z-2 bg-white/60" />
-        <!-- 内容 -->
         <TitleBarFace
           :back-visible="false"
           :title="pageTitle"
@@ -77,12 +51,9 @@ function forceReload(): void {
         />
       </div>
 
-      <!-- ═══ B 面（header 布局时翻转到正面） ═══ -->
+      <!-- ═══ B 面 ═══ -->
       <div class="face face-b">
-        <!-- 背景层 -->
-        <div class="absolute inset-0 z-1" />
         <div class="absolute inset-0 z-2 bg-gradient-to-b from-white/60 to-white/20" />
-        <!-- 内容 -->
         <TitleBarFace
           :back-visible="true"
           :title="pageTitle"
@@ -99,31 +70,33 @@ function forceReload(): void {
 </template>
 
 <style scoped>
-/* ── 3D 翻转容器 ────────────────────────────── */
+/* ── 容器 ───────────────────────────────────── */
 .prism {
+  position: relative;
   width: 100%;
   height: 100%;
-  position: relative;
-  transform-style: preserve-3d;
-  transition: transform 0.44s ease;
-  transform-origin: top center;
 }
-.prism.flipped {
-  transform: rotateX(-90deg);
-}
+
+/* ── 双面共用 ────────────────────────────────── */
 .face {
   position: absolute;
   inset: 0;
+  transition: transform 0.44s ease;
 }
 
-/* ── A 面：正面（默认可见） ──────────────────── */
+/* A 面：默认可见 */
 .face-a {
-  transform: rotateX(0deg);
+  transform: translateY(0);
+}
+.prism.flipped .face-a {
+  transform: translateY(-100%);
 }
 
-/* ── B 面：顶部（flipped 时旋转到正面） ──────── */
+/* B 面：隐藏在下方 */
 .face-b {
-  transform: rotateX(90deg);
-  transform-origin: top center;
+  transform: translateY(100%);
+}
+.prism.flipped .face-b {
+  transform: translateY(0);
 }
 </style>

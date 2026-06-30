@@ -244,6 +244,20 @@ function minimize(): void { ... }
 
 ## CSS 变量
 
+### keep-alive 与 Transition 冲突
+
+`<keep-alive>` 和 `<Transition>` 同时使用时**不兼容**：
+
+- `keep-alive` 缓存的组件切换时通过 `v-show` 样式的 `activated/deactivated` 控制显隐，不触发 DOM 移除
+- `<Transition>` 依赖子元素的 DOM 插入/移除来触发 leave/enter 动画
+- 结果：enter 动画可能正常，但 **leave 动画完全失效**（旧页面瞬间消失）
+
+**当前方案**：不使用 `keep-alive`，通过 `:key="r.path"` 确保 Transition 正确触发。
+
+**未来方向**：需要缓存页面状态时，用 Pinia store 或 `sessionStorage` 保存关键状态，页面重新挂载时恢复。详见 `docs/未来开发计划-store状态缓存.md`。
+
+## CSS 变量
+
 App.vue 通过 `:style` 向下传递的 CSS 自定义属性：
 
 | 变量 | 来源 | 用途 |
