@@ -1,5 +1,5 @@
-appId: com.lx000.vite-vue3-tres-app
-productName: vite-vue3-tres-app
+appId: com.lx000.electron-template-lx000
+productName: electron-template-lx000
 directories:
   buildResources: build
 files:
@@ -18,7 +18,7 @@ electronLanguages:
   - zh-CN
   - en-US
 win:
-  executableName: vite-vue3-tres-app
+  executableName: electron-template-lx000
   # 绿色免安装 zip 包
   target:
     - target: nsis

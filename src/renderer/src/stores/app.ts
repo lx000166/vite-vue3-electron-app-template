@@ -8,7 +8,7 @@
  */
 export const useAppStore = defineStore('app', () => {
   /** 应用标题 */
-  const title = ref('vite-vue3-tres-app')
+  const title = ref('electron-template-lx000')
   /** 副标题（预留扩展） */
   const subtitle = ref('Electron + Vue 3 + UnoCSS + Naive UI')
 
