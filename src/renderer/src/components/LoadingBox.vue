@@ -24,7 +24,7 @@ const loading = useLoading()
       >
         <div class="relative mt-4">
           <div class="loader-hb absolute top-0" />
-          <div class="loader-hb-2" />
+          <div class="loader-hb-2 absolute top-0" />
         </div>
       </div>
     </Transition>
@@ -76,22 +76,33 @@ const loading = useLoading()
 }
 </style>
 
-<!-- ═══ loader-hb（下层：红/黄/蓝） ═══ -->
+<!-- ═══ loader-hb / loader-hb-2（蓝紫青渐变，和登录页光晕同源） ═══ -->
 <style scoped>
 .loader-hb {
-  z-index: 1;
   height: 32px;
   aspect-ratio: 0.866;
   display: grid;
-  background: conic-gradient(from -121deg at right, #0000, #ea4335a9 1deg 60deg, #0000 61deg);
+  background: conic-gradient(
+    from -121deg at right,
+    #0000,
+    rgba(147, 197, 253, 0.4) 1deg 60deg,
+    #0000 61deg
+  );
   animation: l12 2.5s infinite linear;
   transform-origin: 33% 50%;
 }
 .loader-hb:before,
 .loader-hb:after {
+  position: relative;
+  z-index: 1;
   content: '';
   grid-area: 1/1;
-  background: conic-gradient(from -121deg at right, #0000, #fbbc04a9 1deg 60deg, #0000 61deg);
+  background: conic-gradient(
+    from -121deg at right,
+    #0000,
+    rgba(196, 181, 253, 0.5) 1deg 60deg,
+    #0000 61deg
+  );
   transform-origin: inherit;
   animation: inherit;
 }
@@ -100,7 +111,12 @@ const loading = useLoading()
   animation-delay: -0.48s;
 }
 .loader-hb:after {
-  background: conic-gradient(from -121deg at right, #0000, #4285f4a9 1deg 60deg, #0000 61deg);
+  background: conic-gradient(
+    from -121deg at right,
+    #0000,
+    rgba(103, 232, 249, 0.55) 1deg 60deg,
+    #0000 61deg
+  );
   animation-duration: 3.3s;
   animation-delay: -1.1s;
 }
@@ -110,32 +126,63 @@ const loading = useLoading()
   }
 }
 
-/* 上层：黄/红/绿 */
 .loader-hb-2 {
   height: 32px;
   aspect-ratio: 0.866;
   display: grid;
-  background: conic-gradient(from -121deg at right, #0000, #fbbc04a9 1deg 60deg, #0000 61deg);
+
+  background: conic-gradient(
+    from -121deg at right,
+    #0000,
+    rgba(147, 197, 253, 0.6) 1deg 60deg,
+    #0000 61deg
+  );
   animation: l12 3.7s infinite linear;
   transform-origin: 33% 50%;
   animation-delay: -1.85s;
 }
 .loader-hb-2:before,
 .loader-hb-2:after {
+  position: relative;
+  z-index: 1;
   content: '';
   grid-area: 1/1;
-  background: conic-gradient(from -121deg at right, #0000, #ea4335a9 1deg 60deg, #0000 61deg);
+  background: conic-gradient(
+    from -121deg at right,
+    #0000,
+    rgba(196, 181, 253, 0.7) 1deg 60deg,
+    #0000 61deg
+  );
   transform-origin: inherit;
   animation: inherit;
 }
 .loader-hb-2:before {
+  position: relative;
+  z-index: 10;
   animation-duration: 4.1s;
   animation-delay: -2.73s;
 }
 .loader-hb-2:after {
-  background: conic-gradient(from -121deg at right, #0000, #34a853a9 1deg 60deg, #0000 61deg);
-  animation-duration: 4.5s;
-  animation-delay: -3.75s;
+  z-index: 11;
+  background: conic-gradient(
+    from -121deg at right,
+    #0000,
+    rgba(103, 232, 249, 0.75) 1deg 60deg,
+    #0000 61deg
+  );
+  animation:
+    l12 4.5s infinite linear,
+    pulse 8s infinite ease;
+  animation-delay: -3.75s, 0s;
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 </style>
 
