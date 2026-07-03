@@ -28,6 +28,7 @@
 | 类型系统 | TypeScript | 6 |
 | UI 组件库 | Naive UI（自动按需注册） | 2.44 |
 | CSS 方案 | UnoCSS（原子 class + 属性模式）+ SCSS | 66 / 1.x |
+| 3D 引擎 | TresJS（Three.js for Vue）+ @tresjs/cientos | 5.x |
 | 图标库 | IconPark Outline（UnoCSS safelist 全量，~2600 图标） | — |
 | 状态管理 | Pinia | 3 |
 | 路由 | Vue Router（Hash 模式 + 文件路由 + `definePage`） | 5.1 |
@@ -52,21 +53,30 @@ src/
         ├── main.ts             # 渲染进程入口（挂载 Pinia/Router/UnoCSS）
         ├── pages/              # 📁 文件路由：vue-router/vite 自动扫描生成
         │   ├── login.vue       #   → /login（无标题栏）
-        │   ├── home.vue        #   → /home（侧边栏，3D 四棱柱示例）
+        │   ├── home.vue        #   → /home（侧边栏，CSS 3D 四棱柱示例）
         │   ├── setting.vue     #   → /setting（侧边栏，退出登录）
-        │   ├── tres.vue        #   → /tres（无侧边栏，header 翻转）
+        │   ├── map.vue         #   → /map（header，占位待开发）
         │   ├── icons.vue       #   → /icons（IconPark 图标库展示）
+        │   ├── tres/           #   → /tres（TresJS 3D 场景）
+        │   │   ├── index.vue   #      TresCanvas + 相机 + 网格 + OrbitControls
+        │   │   └── components/ #      FirstExperience / TresScene
         │   └── [...all].vue    #   → 404 兜底
         ├── components/         # 公共组件（自动注册）
         │   ├── TitleBar.vue    #   标题栏（3D 翻转 A/B 面）
-        │   ├── TitleBarFace.vue #  标题栏单面（三层：模糊/背景/内容）
+        │   ├── TitleBarFace.vue #  标题栏单面（返回按钮 + 标题 + 窗口控制）
         │   ├── SideMenu.vue    #   侧边栏菜单（NaiveUI n-menu + 折叠）
-        │   └── MainContainer.vue # 主内容容器（自动撑满 + 平滑过渡）
+        │   ├── MainContainer.vue # 主内容容器（自动撑满 + 平滑过渡）
+        │   └── transitions/    # 页面过渡动画组件
+        │       ├── PageFade.vue    # 路由过渡（page-up/down/fade 三级决策）
+        │       ├── MenuSlide.vue   # 侧边栏水平滑动
+        │       └── TitleSlide.vue  # 标题栏垂直滑动
         ├── stores/
         │   ├── app.ts          # 应用全局状态（标题）
         │   └── auth.ts         # 登录状态（localStorage 持久化）
         ├── composables/
         │   └── useMenu.ts      # 菜单数据（从路由 meta 提取）
+        ├── utils/
+        │   └── sleep.ts        # 异步延迟工具（AutoImport 全局可用）
         ├── config/
         │   └── menu-icons.ts   # 菜单图标常量（兜底图标）
         ├── theme/
@@ -74,7 +84,7 @@ src/
         ├── router/
         │   └── index.ts        # 路由配置（前置鉴权守卫）
         ├── types/
-        │   ├── route-meta.d.ts # RouteMeta 扩展（layout/requiresAuth/addMenu）
+        │   ├── route-meta.d.ts # RouteMeta 扩展（layout/requiresAuth/addMenu/transitionName 等）
         │   ├── env.d.ts        # Vite 客户端类型
         │   ├── auto-imports.d.ts     # 自动生成（不提交 Git）
         │   ├── components.d.ts       # 自动生成（不提交 Git）
@@ -96,6 +106,50 @@ src/
 - 每个页面通过 `definePage({ meta: {...} })` 声明布局模式、菜单信息
 - 菜单项由 `useMenu.ts` 从 `router.getRoutes()` 中提取 `addMenu: true` 的路由
 - 通配路由 `[...all].vue` 提供 404 兜底
+
+### RouteMeta 完整字段
+
+`definePage({ meta })` 中可声明的所有字段：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `layout` | `'none' \| 'header' \| 'sidebar'` | 布局模式 |
+| `requiresAuth` | `boolean` | 是否需要登录鉴权 |
+| `addMenu` | `boolean` | 是否加入侧边栏菜单 |
+| `sort` | `number` | 菜单排序权重（升序） |
+| `menuTitle` | `string` | 菜单显示名称 |
+| `menuIcon` | `string` | 菜单图标名（IconPark Outline） |
+| `transitionName` | `string` | 页面过渡动画名（可选，重性能页面降级用） |
+
+### 页面过渡动画（PageFade）
+
+动画名通过 `resolveName()` 决策，三级优先级：
+
+```
+① from.meta.transitionName  — 离开页面声明（尊重重性能页面降级）
+② to.meta.transitionName    — 进入页面声明
+③ sort 自动推断            — curr > prev ? 'page-up' : 'page-down' : 'page-fade'
+```
+
+可用动画名：
+
+| 动画名 | 效果 | 适用场景 |
+|--------|------|----------|
+| `page-fade` | 纯淡入淡出（opacity） | 重性能页面（TresJS 3D）、默认 |
+| `page-up` | `translateY` + `scale` 向上翻页 | 轻量页面间切换 |
+| `page-down` | `translateY` + `scale` 向下翻页 | 轻量页面间切换 |
+
+**TresJS 3D 页面**必须在 `definePage` 中声明 `transitionName: 'page-fade'`，
+避免 `page-up/down` 的 `transform/scale` 在 WebGL 渲染上产生卡顿。
+
+### TresJS 3D 页面注意事项
+
+- **render-mode**：设为 `"always"`，避免 on-demand 模式在 CSS transition 期间停止渲染
+- **preserve-drawing-buffer**：防止 canvas resize 时清空 WebGL 缓冲区
+- **transitionName**：`definePage` 中声明 `'page-fade'`（见上方说明）
+- **离开白屏**：遮罩方案——先显示同色遮罩覆盖 canvas，再卸载 TresCanvas，详见 `tres/index.vue`
+- **空 style 标签**：Vite 8 + @vitejs/plugin-vue 6.x 对空 `<style scoped>` 会报 `cannot read properties of undefined`，必须有一条实际 CSS 规则
+- **Tres* 组件**：由 TresCanvas 运行时注入，`unplugin-vue-components` 的 `exclude` 需排除 `/^Tres[A-Z]/`、`/^tres-/`、`/^primitive$/`
 
 ### 布局系统
 
@@ -121,7 +175,7 @@ main (w-screen h-screen overflow-hidden)
 - **Vue Router**：`useRouter`、`useRoute`、`onBeforeRouteLeave` 等
 - **Pinia**：`defineStore`、`storeToRefs`、`createPinia` 等
 - **Naive UI**：`useMessage`、`useDialog`、`useNotification`、`useLoadingBar`
-- **自定义目录**：`src/stores/`、`src/composables/` 下的导出自动可用
+- **自定义目录**：`src/stores/`、`src/composables/`、`src/utils/` 下的导出自动可用
 
 ### 组件自动注册（无需手动 import）
 

@@ -17,7 +17,8 @@ definePage({
     addMenu: true,
     sort: 1,
     menuTitle: '首页',
-    menuIcon: 'home'
+    menuIcon: 'home',
+    transitionName: 'page-fade'
   }
 })
 
@@ -26,28 +27,34 @@ function doLogout(): void {
   authStore.logout()
   router.replace('/login')
 }
+const loadingStart = () => useLoading().start()
+const loadingEnd = () => useLoading().done()
 </script>
 
 <template>
-  <MainContainer>
-    <!-- 欢迎区 -->
-    <div class="h-full flex flex-col items-center justify-center gap-4">
-      <h1 class="text-2xl font-bold">欢迎回来</h1>
-      <p class="text-gray-500">这是首页，通过侧边栏导航到其他页面。</p>
+  <ParticleBg>
+    <MainContainer>
+      <!-- 欢迎区 -->
+      <div class="h-full flex flex-col items-center justify-center gap-4">
+        <h1 class="text-2xl font-bold">欢迎回来</h1>
+        <p class="text-gray-500">这是首页，通过侧边栏导航到其他页面。</p>
 
-      <!-- 3D 四棱柱演示 -->
-      <div class="scene mt-4">
-        <div class="prism">
-          <div class="face face-front">Front</div>
-          <div class="face face-top">Top</div>
-          <div class="face face-back">Back</div>
-          <div class="face face-bottom">Bottom</div>
+        <!-- 3D 四棱柱演示 -->
+        <div class="scene mt-4">
+          <div class="prism">
+            <div class="face face-front">Front</div>
+            <div class="face face-top">Top</div>
+            <div class="face face-back">Back</div>
+            <div class="face face-bottom">Bottom</div>
+          </div>
         </div>
+        <p class="text-gray-400 text-sm">CSS 3D Transform 四棱柱旋转</p>
+        <n-button class="mt-4" @click="doLogout">退出登录</n-button>
+        <n-button class="mt-4" @click="loadingStart()">loading</n-button>
+        <n-button class="mt-4" @click="loadingEnd()">no-loading</n-button>
       </div>
-      <p class="text-gray-400 text-sm">CSS 3D Transform 四棱柱旋转</p>
-      <n-button class="mt-4" @click="doLogout">退出登录</n-button>
-    </div>
-  </MainContainer>
+    </MainContainer>
+  </ParticleBg>
 </template>
 
 <style scoped>

@@ -16,7 +16,7 @@
       <div class="p-16px w-full h-full box-border">
         <!-- 白色圆角卡片 -->
         <div
-          class="rounded-8px bg-white/30 shadow-[0_2px_12px_rgba(0,0,0,0.08)] w-full h-full box-border"
+          class="rounded-8px bg-white/5 shadow-[0_2px_12px_rgba(0,0,0,0.08)] w-full h-full box-border"
         >
           <div class="p-16px w-full h-full box-border">
             <slot />

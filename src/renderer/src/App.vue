@@ -44,9 +44,12 @@ const sideW = computed(() => (collapsed.value ? COLLAPSED_WIDTH : EXPANDED_WIDTH
         <n-notification-provider>
           <n-loading-bar-provider>
             <main
-              class="relative w-screen h-screen overflow-hidden"
+              id="APP_ROOT"
+              class="relative w-screen h-screen overflow-hidden drag"
               :style="{ '--side-w': sideW, '--title-h': TITLE_BAR_H + 'px' }"
             >
+              <LoadingBox />
+
               <!-- 页面内容：动态过渡动画 -->
               <router-view v-slot="{ Component, route: r }">
                 <PageFade>
@@ -67,6 +70,7 @@ const sideW = computed(() => (collapsed.value ? COLLAPSED_WIDTH : EXPANDED_WIDTH
               <TitleSlide>
                 <TitleBar v-if="layout !== 'none'" />
               </TitleSlide>
+              <!-- </LoadingBox> -->
             </main>
           </n-loading-bar-provider>
         </n-notification-provider>

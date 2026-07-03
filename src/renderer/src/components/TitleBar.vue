@@ -22,23 +22,35 @@ const pageTitle = computed(() => {
 })
 
 // ── 窗口控制 ──────────────────────────────────
-function minimize(): void { window.electronAPI?.windowMinimize() }
-function toggleMaximize(): void { window.electronAPI?.windowToggleMaximize() }
-function closeWindow(): void { window.electronAPI?.windowClose() }
-function goBack(): void { router.back() }
-function openDevTools(): void { window.electronAPI?.openDevTools() }
-function forceReload(): void { window.electronAPI?.forceReload() }
+function minimize(): void {
+  window.electronAPI?.windowMinimize()
+}
+function toggleMaximize(): void {
+  window.electronAPI?.windowToggleMaximize()
+}
+function closeWindow(): void {
+  window.electronAPI?.windowClose()
+}
+function goBack(): void {
+  router.back()
+}
+function openDevTools(): void {
+  window.electronAPI?.openDevTools()
+}
+function forceReload(): void {
+  window.electronAPI?.forceReload()
+}
 </script>
 
 <template>
   <header
-    class="drag absolute top-0 left-0 right-0 z-20 overflow-hidden backdrop-blur-4px"
+    class="drag absolute top-0 left-0 right-0 z-72 backdrop-blur-2px"
     :style="{ height: 'var(--title-h)' }"
   >
-    <div class="prism" :class="{ flipped }">
+    <div class="prism overflow-hidden" :class="{ flipped }">
       <!-- ═══ A 面 ═══ -->
       <div class="face face-a">
-        <div class="absolute inset-0 z-2 bg-white/60" />
+        <div class="absolute inset-0 z-2 bg-white/30" />
         <TitleBarFace
           :back-visible="false"
           :title="pageTitle"
@@ -53,7 +65,7 @@ function forceReload(): void { window.electronAPI?.forceReload() }
 
       <!-- ═══ B 面 ═══ -->
       <div class="face face-b">
-        <div class="absolute inset-0 z-2 bg-gradient-to-b from-white/60 to-white/20" />
+        <div class="absolute inset-0 z-2 bg-gradient-to-b from-white/30 to-white/15" />
         <TitleBarFace
           :back-visible="true"
           :title="pageTitle"
@@ -84,9 +96,10 @@ function forceReload(): void { window.electronAPI?.forceReload() }
   transition: transform 0.44s ease;
 }
 
-/* A 面：默认可见 */
+/* A 面：默认可见 + 下方阴影 */
 .face-a {
   transform: translateY(0);
+  box-shadow: inset 0 -1px 1px rgba(0, 0, 0, 0.06);
 }
 .prism.flipped .face-a {
   transform: translateY(-100%);

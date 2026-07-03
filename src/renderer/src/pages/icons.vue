@@ -39,13 +39,13 @@ const filtered = computed(() =>
       <!-- 搜索框 -->
       <input
         v-model="search"
-        class="mb-4 px-3 py-2 rounded-6px border border-gray-200 bg-white/50 outline-none text-sm w-full max-w-300px"
+        class="mb-4 px-3 py-2 rounded-6px border border-gray-200 bg-white/50 outline-none text-sm w-full max-w-300px no-drag"
         placeholder="搜索图标..."
       />
 
       <!-- 图标网格 -->
       <n-scrollbar style="flex: 1">
-        <div class="grid grid-cols-6 gap-2">
+        <div class="grid grid-cols-6 gap-2 no-drag">
           <!-- 每个图标项 -->
           <div
             v-for="name in filtered"
@@ -59,7 +59,7 @@ const filtered = computed(() =>
               :class="'i-icon-park-outline-' + name"
             ></span>
             <!-- 名称 -->
-            <span class="text-10px text-gray-400 truncate w-full text-center">{{ name }}</span>
+            <span class="text-16px text-gray-400 truncate w-full text-center">{{ name }}</span>
           </div>
         </div>
 

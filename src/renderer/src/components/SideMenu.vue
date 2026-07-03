@@ -48,26 +48,28 @@ const activeKey = computed(() => route.path)
 
 <template>
   <aside
-    class="absolute left-0 flex flex-col border-r border-#ffffff11 bg-white/30 backdrop-blur-md transition-all duration-200 overflow-hidden z-10"
+    class="absolute left-0 flex flex-col border-r border-#ffffff11 bg-white/30 backdrop-blur-2px transition-all duration-200 overflow-hidden z-71"
     :style="{
       top: 'var(--title-h)',
       height: 'calc(100% - var(--title-h))',
       width: 'var(--side-w)'
     }"
   >
-    <!-- 菜单区域 -->
-    <div class="no-drag flex-1 mt-2px overflow-hidden" :style="{ width: 'var(--side-w)' }">
-      <n-menu
-        :root-indent="18"
-        :value="activeKey"
-        :options="menuOptions"
-        :collapsed="collapsed"
-        :collapsed-width="60"
-        :default-expand-all="true"
-        @update:value="handleMenuClick"
-      />
-    </div>
-
+    <ParticleBg :particleCount="12" particleColor="rgba(100,100,100,0.21)" :connectDist="90">
+      <!-- 菜单区域 -->
+      <div class="flex-1 mt-2px overflow-hidden w-full">
+        <n-menu
+          class="no-drag"
+          :root-indent="18"
+          :value="activeKey"
+          :options="menuOptions"
+          :collapsed="collapsed"
+          :collapsed-width="60"
+          :default-expand-all="true"
+          @update:value="handleMenuClick"
+        />
+      </div>
+    </ParticleBg>
     <!-- 折叠/展开按钮（底部固定） -->
     <div class="no-drag absolute bottom-2 h-10 w-full px-2 z-10">
       <button

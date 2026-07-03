@@ -15,6 +15,7 @@
  */
 import { resolve } from 'path'
 import { defineConfig } from 'electron-vite'
+import { templateCompilerOptions } from '@tresjs/core'
 import vue from '@vitejs/plugin-vue'
 import VueRouter from 'vue-router/vite'
 import UnoCSS from 'unocss/vite'
@@ -40,15 +41,18 @@ export default defineConfig({
     },
     // ── Vite 插件 ──────────────────────────────
     plugins: [
-      // Vue SFC 编译
-      vue(),
+      // Vue SFC 编译（Tres* 组件由 TresCanvas 运行时注入，编译时跳过）
+      vue({
+        ...templateCompilerOptions
+      }),
 
       // 文件路由：src/renderer/src/pages/** → 自动生成路由表
       // importMode: 'sync' — Electron 环境关闭懒加载，路由切换零延迟
       VueRouter({
         routesFolder: 'src/renderer/src/pages',
         dts: 'src/renderer/src/types/typed-router.d.ts',
-        importMode: 'sync'
+        importMode: 'sync',
+        exclude: ['**/components/**', '**/assets/**', '**/composables/**']
       }),
 
       // UnoCSS 原子 CSS
@@ -57,7 +61,7 @@ export default defineConfig({
       // 自动导入：Vue / Router / Pinia / VueUse / NaiveUI hooks
       AutoImport({
         dts: 'src/types/auto-imports.d.ts',
-        dirs: ['src/stores', 'src/composables'],
+        dirs: ['src/stores', 'src/composables', 'src/utils'],
         imports: [
           'vue',
           'vue-router',
@@ -71,10 +75,12 @@ export default defineConfig({
       }),
 
       // 组件自动注册：NaiveUI 组件 + src/components/
+      // TresJS 组件（Tres* / tres-* / primitive）由 TresCanvas 运行时接管，排除以免误报 "Failed to resolve component"
       Components({
         dts: 'src/types/components.d.ts',
         dirs: ['src/components'],
-        resolvers: [NaiveUiResolver()]
+        resolvers: [NaiveUiResolver()],
+        exclude: [/^Tres[A-Z]/, /^tres-/, /^primitive$/]
       })
     ]
   }

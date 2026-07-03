@@ -1,0 +1,27 @@
+/**
+ * no-drag.css — 全局交互区域 no-drag 声明
+ *
+ * Electron 无边框窗口中，App.vue 在 <main> 上设置了 drag（可拖拽）。
+ * NaiveUI 等第三方组件库的弹出层渲染在 body 下，不在 <main> 内，
+ * 它们默认继承 drag → 用户点击菜单/下拉/弹窗时无法正常交互。
+ *
+ * 此文件为所有需要点击交互的组件强制设置 no-drag。
+ * 规则按组件前缀分组，新增时按字母序追加。
+ *
+ * @see https://www.electronjs.org/docs/latest/api/frameless-window#draggable-region
+ */
+
+/* ═══ NaiveUI ═══ */
+
+/* n-menu：侧边栏菜单 + 下拉弹出层 */
+.n-menu,
+.n-menu-item,
+.n-dropdown-menu,
+.n-popover {
+  -webkit-app-region: no-drag;
+}
+
+/* n-button：所有按钮 */
+.n-button {
+  -webkit-app-region: no-drag;
+}

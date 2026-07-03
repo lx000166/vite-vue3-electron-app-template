@@ -12,16 +12,27 @@
 <script setup lang="ts">
 const router = useRouter()
 
-/** 过渡动画名（beforeEach 中直接赋值，to/from 均为可靠快照） */
+/** 过渡动画名（beforeEach 中动态决策） */
 const transitionName = ref('page-fade')
-router.beforeEach((to, from) => {
+
+/**
+ * 动画名优先级：
+ * ① from.meta.transitionName — 离开页面声明（尊重重性能页面降级）
+ * ② to.meta.transitionName   — 进入页面声明
+ * ③ sort 自动推断           — page-up / page-down / page-fade
+ */
+function resolveName(to: ReturnType<typeof useRoute>, from: ReturnType<typeof useRoute>): string {
+  if (from.meta.transitionName) return from.meta.transitionName as string
+  if (to.meta.transitionName) return to.meta.transitionName as string
+
   const prev = from.meta.sort as number | undefined
   const curr = to.meta.sort as number | undefined
-  if (prev === undefined || curr === undefined || prev === curr) {
-    transitionName.value = 'page-fade'
-  } else {
-    transitionName.value = curr > prev ? 'page-up' : 'page-down'
-  }
+  if (prev === undefined || curr === undefined || prev === curr) return 'page-fade'
+  return curr > prev ? 'page-up' : 'page-down'
+}
+
+router.beforeEach((to, from) => {
+  transitionName.value = resolveName(to, from)
 })
 </script>
 
@@ -40,6 +51,7 @@ router.beforeEach((to, from) => {
 .page-up-leave-active,
 .page-down-enter-active,
 .page-down-leave-active {
+  /* z-index: 11; */
   position: absolute;
   inset: 0;
 }
@@ -53,7 +65,7 @@ router.beforeEach((to, from) => {
 /* ═══ 淡入淡出（默认） ═══ */
 .page-fade-enter-active,
 .page-fade-leave-active {
-  transition: opacity 0.44s ease;
+  transition: opacity 0.5s ease;
 }
 .page-fade-enter-from,
 .page-fade-leave-to {

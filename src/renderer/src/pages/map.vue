@@ -13,7 +13,7 @@ definePage({
     addMenu: true,
     sort: 50,
     menuTitle: '地图',
-    menuIcon: 'view-grid-detail'
+    menuIcon: 'map-two'
   }
 })
 </script>

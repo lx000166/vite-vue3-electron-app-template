@@ -1,10 +1,12 @@
 @import './init.css';
 @import './fonts.css';
+@import './no-drag.css';
 
 body {
   height: 100vh;
   width: 100vw;
-  background-color: #d0d4da;
+  /* background-color: #d0d4da; */
+  background-color: #e6e7e9;
   font-family: 'MF MiMeng', 'Fira Code', 'Microsoft YaHei', 'PingFang SC', sans-serif;
   user-select: none;
 }

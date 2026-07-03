@@ -10,6 +10,7 @@
  * - sort         菜单排序（升序，越小越靠前）
  * - menuTitle    菜单显示名称
  * - menuIcon     菜单图标（对应 @iconify-json/icon-park-outline 图标名）
+ * - transitionName 页面过渡动画名（可选，重性能页面降级用）
  */
 import 'vue-router'
 
@@ -27,7 +28,12 @@ declare module 'vue-router' {
     menuTitle?: string
     /** 菜单图标名（IconPark Outline） */
     menuIcon?: string
-    /** 页面过渡动画名（由 beforeEach 守卫动态写入） */
+    /**
+     * 页面过渡动画名（可选，用于重性能页面的降级动画）
+     *
+     * 优先级：from.meta.transitionName > to.meta.transitionName > sort 自动推断
+     * 例如 TresJS 3D 页面设为 'page-fade'，避免 page-up/down 的 transform 卡顿。
+     */
     transitionName?: string
   }
 }
